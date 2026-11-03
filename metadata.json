@@ -1,8 +1,10 @@
 {
-  "uuid": "skoda-battery@robbeabe.github.io",
+  "uuid": "skoda-battery@aberobbe.github.io",
   "name": "Škoda EV Battery",
   "description": "Shows the battery state of charge of your Škoda EV in the top bar, using the MyŠkoda public API. The API key is kept in the GNOME Keyring.",
-  "shell-version": ["45", "46", "47", "48", "49"],
+  "shell-version": [
+    "46"
+  ],
   "settings-schema": "org.gnome.shell.extensions.skoda-battery",
-  "version": 1
+  "url": "https://github.com/aberobbe/skoda-gnome-battery-indicator"
 }
