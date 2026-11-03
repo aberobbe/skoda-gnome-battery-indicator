@@ -1,0 +1,1 @@
+# skoda-gnome-battery-indicator
