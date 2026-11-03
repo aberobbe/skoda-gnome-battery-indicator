@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.skoda-battery"
+          path="/org/gnome/shell/extensions/skoda-battery/">
+    <key name="poll-interval" type="u">
+      <range min="10" max="120"/>
+      <default>20</default>
+      <summary>Polling interval in minutes (10, 20, 30, 45, 60, 90 or 120)</summary>
+    </key>
+    <key name="charging-poll" type="b">
+      <default>true</default>
+      <summary>Poll at least every 15 minutes while the car is charging</summary>
+    </key>
+    <key name="vin" type="s">
+      <default>''</default>
+      <summary>Vehicle Identification Number (17 characters)</summary>
+    </key>
+    <key name="key-revision" type="u">
+      <default>0</default>
+      <summary>Bumped by the preferences window when the API key in the keyring changes (holds no secret)</summary>
+    </key>
+  </schema>
+</schemalist>
