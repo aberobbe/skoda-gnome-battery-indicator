@@ -13,8 +13,8 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {lookupApiKey} from './secret.js';
 
 const API_BASE = 'https://public.api.connect.skoda-auto.cz/api/v1/vehicles/';
-const ALLOWED_INTERVALS = [10, 20, 30, 45, 60, 90, 120];
-const CHARGING_INTERVAL = 15;
+const MIN_INTERVAL = 1;
+const MAX_INTERVAL = 1440;
 
 const CHARGING_STATES = {
     CONNECT_CABLE: 'Cable not connected',
@@ -75,6 +75,7 @@ class SkodaIndicator extends PanelMenu.Button {
         this._settingsIds = [
             this._settings.connect('changed::poll-interval', () => this._schedule()),
             this._settings.connect('changed::charging-poll', () => this._schedule()),
+            this._settings.connect('changed::charging-interval', () => this._schedule()),
             this._settings.connect('changed::vin', () => this._refresh()),
             this._settings.connect('changed::key-revision', () => this._refresh()),
         ];
@@ -90,12 +91,10 @@ class SkodaIndicator extends PanelMenu.Button {
     }
 
     _intervalMinutes() {
-        const v = this._settings.get_uint('poll-interval');
-        const base = ALLOWED_INTERVALS.includes(v) ? v : 20;
-        // While charging, poll every 15 min, unless the normal interval is already shorter.
-        if (this._charging && this._settings.get_boolean('charging-poll'))
-            return Math.min(base, CHARGING_INTERVAL);
-        return base;
+        const key = this._charging && this._settings.get_boolean('charging-poll')
+            ? 'charging-interval' : 'poll-interval';
+        const v = this._settings.get_uint(key);
+        return Math.min(Math.max(v, MIN_INTERVAL), MAX_INTERVAL);
     }
 
     _schedule() {

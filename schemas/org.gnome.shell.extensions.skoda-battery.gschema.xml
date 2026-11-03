@@ -3,13 +3,18 @@
   <schema id="org.gnome.shell.extensions.skoda-battery"
           path="/org/gnome/shell/extensions/skoda-battery/">
     <key name="poll-interval" type="u">
-      <range min="10" max="120"/>
-      <default>20</default>
-      <summary>Polling interval in minutes (10, 20, 30, 45, 60, 90 or 120)</summary>
+      <range min="1" max="1440"/>
+      <default>60</default>
+      <summary>Polling interval in minutes while not charging</summary>
     </key>
     <key name="charging-poll" type="b">
       <default>true</default>
-      <summary>Poll at least every 15 minutes while the car is charging</summary>
+      <summary>Use a separate polling interval while the car is charging</summary>
+    </key>
+    <key name="charging-interval" type="u">
+      <range min="1" max="1440"/>
+      <default>15</default>
+      <summary>Polling interval in minutes while charging</summary>
     </key>
     <key name="vin" type="s">
       <default>''</default>

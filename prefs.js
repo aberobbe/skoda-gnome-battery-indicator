@@ -6,9 +6,6 @@ import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/ex
 
 import {lookupApiKey, storeApiKey, clearApiKey} from './secret.js';
 
-const INTERVALS = [10, 20, 30, 45, 60, 90, 120];
-const intervalLabel = m => (m < 60 ? `${m} minutes` : m === 60 ? "1 hour" : `${m / 60} hours`);
-
 export default class SkodaBatteryPrefs extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
@@ -104,21 +101,32 @@ export default class SkodaBatteryPrefs extends ExtensionPreferences {
         const pollGroup = new Adw.PreferencesGroup({title: 'Polling'});
         page.add(pollGroup);
 
-        const pollRow = new Adw.ComboRow({
-            title: 'Refresh every',
-            model: Gtk.StringList.new(INTERVALS.map(intervalLabel)),
-        });
-        const idx = INTERVALS.indexOf(settings.get_uint('poll-interval'));
-        pollRow.selected = idx >= 0 ? idx : 1;
-        pollRow.connect('notify::selected', () =>
-            settings.set_uint('poll-interval', INTERVALS[pollRow.selected]));
-        pollGroup.add(pollRow);
+        const minutesRow = (title, subtitle, key) => {
+            const row = new Adw.SpinRow({
+                title,
+                subtitle,
+                adjustment: new Gtk.Adjustment({
+                    lower: 1, upper: 1440, step_increment: 1, page_increment: 10,
+                }),
+                digits: 0,
+                numeric: true,
+            });
+            settings.bind(key, row, 'value', Gio.SettingsBindFlags.DEFAULT);
+            return row;
+        };
+
+        pollGroup.add(minutesRow('Refresh every (minutes)',
+            'While the car is not charging', 'poll-interval'));
 
         const chargingRow = new Adw.SwitchRow({
-            title: 'Refresh every 15 minutes while charging',
-            subtitle: 'Only applies when the interval above is longer than 15 minutes',
+            title: 'Use a different interval while charging',
         });
         settings.bind('charging-poll', chargingRow, 'active', Gio.SettingsBindFlags.DEFAULT);
         pollGroup.add(chargingRow);
+
+        const chargingIntervalRow = minutesRow('Refresh while charging (minutes)',
+            'While the car is charging', 'charging-interval');
+        settings.bind('charging-poll', chargingIntervalRow, 'sensitive', Gio.SettingsBindFlags.GET);
+        pollGroup.add(chargingIntervalRow);
     }
 }
