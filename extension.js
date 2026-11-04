@@ -42,6 +42,7 @@ class SkodaIndicator extends PanelMenu.Button {
         this._cancellable = new Gio.Cancellable();
         this._timerId = 0;
         this._busy = false;
+        this._destroyed = false;
         this._charging = false;
         this._scheduledMinutes = 0;
 
@@ -114,12 +115,14 @@ class SkodaIndicator extends PanelMenu.Button {
     }
 
     async _refresh() {
-        if (this._busy)
+        if (this._busy || this._destroyed)
             return;
         this._busy = true;
         try {
             await this._doRefresh();
         } catch (e) {
+            if (this._destroyed)
+                return;
             if (!e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
                 this._setError(e.message);
                 console.warn(`[skoda-battery] ${e.message}`);
@@ -136,6 +139,8 @@ class SkodaIndicator extends PanelMenu.Button {
             return;
         }
         const apiKey = await lookupApiKey(this._cancellable);
+        if (this._destroyed)
+            return;
         if (!apiKey) {
             this._setError('Set your API key in Settings');
             return;
@@ -156,6 +161,8 @@ class SkodaIndicator extends PanelMenu.Button {
                     }
                 });
         });
+        if (this._destroyed)
+            return;
 
         const status = msg.get_status();
         const text = new TextDecoder().decode(bytes.get_data() ?? new Uint8Array());
@@ -240,6 +247,7 @@ class SkodaIndicator extends PanelMenu.Button {
     }
 
     destroy() {
+        this._destroyed = true;
         this._cancellable.cancel();
         if (this._timerId) {
             GLib.source_remove(this._timerId);
